@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>와파린 복용 체크리스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .calendar div {
+            padding: 10px;
+            background-color: #eaeaea;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .calendar input[type="checkbox"] {
+            margin-top: 5px;
+        }
+        button, input[type="time"] {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .month {
+            margin-top: 30px;
+        }
+        .month h2 {
+            text-align: center;
+        }
+        .reminder {
+            margin-top: 30px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <!-- 첫 번째 페이지 - 와파린 복용 체크리스트 -->
+    <div class="container" id="timePage">
+        <h1>와파린 복용 체크리스트</h1>
+        <label for="time">와파린 복용 시간을 선택하세요:</label><br>
+        <input type="time" id="reminderTime"><br>
+        <button onclick="setReminder()">시간 설정</button>
+        <p id="timeMessage" class="reminder" style="display:none;"></p>
+    </div>
+
+    <!-- 두 번째 페이지 - 2024년 달력 -->
+    <div id="calendarPage" class="container" style="display:none;">
+        <h1>2024년 와파린 복용 체크리스트</h1>
+
+        <div id="months"></div>
+
+        <button onclick="saveChecklist()">체크리스트 저장</button>
+        <a href="#" onclick="showForgotPage()">와파린을 먹는 것을 깜박했어요</a>
+    </div>
+
+    <!-- 세 번째 페이지 - 와파린을 먹는 것을 깜박했을 때 -->
+    <div id="forgotPage" class="container" style="display:none;">
+        <h1>와파린 복용을 깜박했을 때</h1>
+        <p>와파린을 먹는 것을 깜빡한 경우:</p>
+        <ul>
+            <li>최대한 빨리 복용하세요. 그러나, 이미 다음 복용 시간이 가까워졌다면, 이전 복용량을 건너뛰고 다음 복용 시간에 정상적으로 복용하세요.</li>
+            <li>절대 두 배로 복용하지 마세요.</li>
+            <li>상황에 따라 의사와 상의하세요.</li>
+        </ul>
+    </div>
+
+    <script>
+        function setReminder() {
+            const reminderTime = document.getElementById('reminderTime').value;
+            if (reminderTime) {
+                const timeMessage = document.getElementById('timeMessage');
+                
+                // 사용자 지정 시간을 표시 (예: 오후 4시 35분)
+                const [hour, minute] = reminderTime.split(":");
+                const formattedTime = formatTime(hour, minute);
+                timeMessage.innerText = `매일 ${formattedTime}에 휴대폰 알람을 맞춰주세요!`;
+
+                timeMessage.style.display = 'block'; // 시간 설정 알림 문구 표시
+                
+                setTimeout(() => {
+                    document.getElementById('timePage').style.display = 'none'; // 첫 페이지 숨기기
+                    document.getElementById('calendarPage').style.display = 'block'; // 두 번째 페이지(달력) 표시
+                }, 3000); // 3초 후 달력 페이지로 이동
+            } else {
+                alert("와파린 복용 시간을 선택하세요.");
+            }
+        }
+
+        function formatTime(hour, minute) {
+            const h = parseInt(hour);
+            const period = h >= 12 ? '오후' : '오전';
+            const formattedHour = h > 12 ? h - 12 : h === 0 ? 12 : h;
+            return `${period} ${formattedHour}시 ${minute}분`;
+        }
+
+        // 각 달의 일 수
+        const daysInMonths = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const monthNames = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
+
+        function generateCalendar() {
+            const monthsDiv = document.getElementById('months');
+            for (let month = 0; month < 12; month++) {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'month';
+                const monthTitle = document.createElement('h2');
+                monthTitle.textContent = monthNames[month];
+                monthDiv.appendChild(monthTitle);
+
+                const calendarDiv = document.createElement('div');
+                calendarDiv.className = 'calendar';
+                
+                for (let day = 1; day <= daysInMonths[month]; day++) {
+                    const dayBox = document.createElement('div');
+                    dayBox.innerHTML = `${day}<br><input type="checkbox" id="day${month + 1}-${day}">`;
+                    calendarDiv.appendChild(dayBox);
+                }
+
+                monthDiv.appendChild(calendarDiv);
+                monthsDiv.appendChild(monthDiv);
+            }
+        }
+
+        function saveChecklist() {
+            alert('체크리스트가 저장되었습니다.');
+        }
+
+        function showForgotPage() {
+            document.getElementById('calendarPage').style.display = 'none';
+            document.getElementById('forgotPage').style.display = 'block';
+        }
+
+        window.onload = function() {
+            generateCalendar(); // 달력 생성
+        };
+    </script>
+</body>
+</html>
+
+<script>
+    const checkbox = document.getElementById('warfarin-checkbox');
+
+    // 페이지 로드 시 저장된 값 불러오기
+    const savedCheckedState = localStorage.getItem('warfarin-checkbox');
+    if (savedCheckedState === 'true') {
+        checkbox.checked = true;
+    }
+
+    // 체크박스 상태가 변경될 때 저장
+    checkbox.addEventListener('change', function() {
+        localStorage.setItem('warfarin-checkbox', checkbox.checked);
+    });
+</script>
